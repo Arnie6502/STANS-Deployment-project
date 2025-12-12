@@ -50,6 +50,10 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editingNodeLabel, setEditingNodeLabel] = useState("");
 
+  // Node dragging state
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
   // Version history state
   const [history, setHistory] = useState<GraphSnapshot[]>([]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
@@ -208,6 +212,40 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
   const resetView = () => {
     setZoom(100);
     setPanOffset({ x: 0, y: 0 });
+  };
+
+  // Node dragging handlers
+  const handleNodeDragStart = (nodeId: string, e: React.MouseEvent) => {
+    if (mode === "edge") return; // Don't drag in edge mode
+    e.stopPropagation();
+    setDraggingNodeId(nodeId);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleNodeDrag = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!draggingNodeId) return;
+    
+    const svg = svgRef.current;
+    if (!svg) return;
+    
+    const rect = svg.getBoundingClientRect();
+    const dx = (e.clientX - dragStart.x) * (scaledWidth / rect.width);
+    const dy = (e.clientY - dragStart.y) * (scaledHeight / rect.height);
+    
+    const updatedNodes = nodes.map(n => 
+      n.id === draggingNodeId 
+        ? { ...n, x: n.x + dx, y: n.y + dy }
+        : n
+    );
+    setNodes(updatedNodes);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleNodeDragEnd = () => {
+    if (draggingNodeId) {
+      saveToHistory(`Moved node ${draggingNodeId}`, nodes, edges);
+      setDraggingNodeId(null);
+    }
   };
 
   const handleNodeClick = (nodeId: string, e: React.MouseEvent) => {
@@ -414,12 +452,12 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
           {/* Instructions */}
           <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg text-sm">
             <p>
-              {mode === "node" && "Click anywhere on the canvas to add nodes"}
+              {mode === "node" && "Click anywhere on the canvas to add nodes. Drag nodes to move them."}
               {mode === "edge" && edgeStart === null && "Click a node to start creating an edge"}
               {mode === "edge" && edgeStart !== null && `Creating edge from ${edgeStart}. Click another node to complete.`}
             </p>
             <p className="text-muted-foreground mt-1">
-              Tip: Hold Alt + Drag to pan, Scroll to zoom, Double-click node to edit name
+              Tip: Drag nodes to reposition | Alt+Drag to pan | Scroll to zoom | Double-click node to rename
             </p>
           </div>
 
@@ -453,12 +491,21 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
               height="500"
               viewBox={`${viewBoxX} ${viewBoxY} ${scaledWidth} ${scaledHeight}`}
               preserveAspectRatio="xMidYMid meet"
-              className={`min-w-[400px] ${isPanning ? "cursor-grabbing" : mode === "node" ? "cursor-crosshair" : "cursor-pointer"}`}
+              className={`min-w-[400px] ${draggingNodeId ? "cursor-grabbing" : isPanning ? "cursor-grabbing" : mode === "node" ? "cursor-crosshair" : "cursor-pointer"}`}
               onClick={handleSvgClick}
               onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
+              onMouseMove={(e) => {
+                handleMouseMove(e);
+                handleNodeDrag(e);
+              }}
+              onMouseUp={() => {
+                handleMouseUp();
+                handleNodeDragEnd();
+              }}
+              onMouseLeave={() => {
+                handleMouseUp();
+                handleNodeDragEnd();
+              }}
               onWheel={handleWheel}
             >
               {/* Draw edges */}
@@ -545,7 +592,9 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                       cy={node.y}
                       r={nodeRadius}
                       fill={
-                        edgeStart === node.id
+                        draggingNodeId === node.id
+                          ? "hsl(var(--accent))"
+                          : edgeStart === node.id
                           ? "hsl(var(--secondary))"
                           : selectedNode === node.id
                           ? "hsl(var(--accent))"
@@ -553,8 +602,9 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                       }
                       stroke="hsl(var(--background))"
                       strokeWidth={3 * (100 / zoom)}
-                      className="cursor-pointer drop-shadow-lg hover:opacity-80 transition-all"
+                      className={`drop-shadow-lg hover:opacity-80 transition-all ${mode === "node" ? "cursor-grab" : "cursor-pointer"} ${draggingNodeId === node.id ? "cursor-grabbing" : ""}`}
                       onClick={(e) => handleNodeClick(node.id, e)}
+                      onMouseDown={(e) => handleNodeDragStart(node.id, e)}
                       onDoubleClick={(e) => startEditingNode(node.id, e)}
                     />
                     <text
