@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Grid3x3, GitBranch, Circle, GitMerge, Layout, MapPin } from "lucide-react";
+import { Grid3x3, GitBranch, Circle, GitMerge, Layout, MapPin, Map, Building2, Landmark } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Edge } from "@/utils/kruskal";
 
 interface Node {
@@ -16,6 +17,7 @@ interface GraphTemplatesProps {
 }
 
 const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
+  // ===== GRAPH TEMPLATES =====
   const generateGrid = () => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
@@ -24,7 +26,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     const offsetX = 50;
     const offsetY = 50;
 
-    // Create grid nodes
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
         const id = String.fromCharCode(65 + row * gridSize + col);
@@ -37,12 +38,9 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       }
     }
 
-    // Create grid edges
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
         const currentId = String.fromCharCode(65 + row * gridSize + col);
-        
-        // Right edge
         if (col < gridSize - 1) {
           const rightId = String.fromCharCode(65 + row * gridSize + col + 1);
           edges.push({
@@ -53,8 +51,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
             isBlocked: false,
           });
         }
-        
-        // Down edge
         if (row < gridSize - 1) {
           const downId = String.fromCharCode(65 + (row + 1) * gridSize + col);
           edges.push({
@@ -80,7 +76,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
 
     let nodeIndex = 0;
     
-    // Generate tree nodes level by level
     for (let level = 0; level < levels; level++) {
       const nodesInLevel = Math.pow(2, level);
       const levelSpacing = baseSpacing / Math.pow(2, level);
@@ -95,7 +90,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
           label: `Node ${id}`,
         });
 
-        // Connect to parent
         if (level > 0) {
           const parentIndex = Math.floor((nodeIndex - Math.pow(2, level) + 1) / 2) + Math.pow(2, level - 1) - 1;
           if (parentIndex >= 0 && parentIndex < nodeIndex) {
@@ -126,7 +120,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     const centerX = 400;
     const centerY = 200;
 
-    // Create nodes in a circle
     for (let i = 0; i < nodeCount; i++) {
       const angle = (i * 2 * Math.PI) / nodeCount - Math.PI / 2;
       const id = String.fromCharCode(65 + i);
@@ -138,7 +131,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       });
     }
 
-    // Connect all nodes to each other
     for (let i = 0; i < nodeCount; i++) {
       for (let j = i + 1; j < nodeCount; j++) {
         edges.push({
@@ -146,7 +138,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
           to: String.fromCharCode(65 + j),
           weight: Math.floor(Math.random() * 12) + 2,
           traffic: ["low", "medium", "high"][Math.floor(Math.random() * 3)] as "low" | "medium" | "high",
-          isBlocked: Math.random() < 0.1, // 10% chance of blocked edge
+          isBlocked: Math.random() < 0.1,
         });
       }
     }
@@ -165,7 +157,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     const offsetXB = 550;
     const startY = 80;
 
-    // Create Set A nodes (left)
     for (let i = 0; i < setACount; i++) {
       const id = String.fromCharCode(65 + i);
       nodes.push({
@@ -176,7 +167,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       });
     }
 
-    // Create Set B nodes (right)
     for (let i = 0; i < setBCount; i++) {
       const id = String.fromCharCode(65 + setACount + i);
       nodes.push({
@@ -187,10 +177,8 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       });
     }
 
-    // Connect nodes from Set A to Set B
     for (let i = 0; i < setACount; i++) {
       for (let j = 0; j < setBCount; j++) {
-        // Not all connections, create some randomly
         if (Math.random() < 0.6) {
           edges.push({
             from: String.fromCharCode(65 + i),
@@ -215,7 +203,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     const centerX = 400;
     const centerY = 200;
 
-    // Create center node
     nodes.push({
       id: "A",
       x: centerX,
@@ -223,7 +210,6 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       label: "Node A",
     });
 
-    // Create outer nodes and connect to center
     for (let i = 0; i < outerNodes; i++) {
       const angle = (i * 2 * Math.PI) / outerNodes;
       const id = String.fromCharCode(66 + i);
@@ -247,6 +233,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     toast.success("Star topology loaded");
   };
 
+  // ===== PAKISTAN MAPS =====
   const generatePakistanMap = () => {
     const nodes: Node[] = [
       { id: "KHI", x: 680, y: 420, label: "Karachi" },
@@ -290,14 +277,280 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     toast.success("Pakistan road network loaded");
   };
 
-  const templates = [
-    {
-      name: "Pakistan Map",
-      description: "Major cities road network of Pakistan",
-      icon: MapPin,
-      color: "primary",
-      action: generatePakistanMap,
-    },
+  // Karachi City Map
+  const generateKarachiMap = () => {
+    const nodes: Node[] = [
+      { id: "CLF", x: 100, y: 350, label: "Clifton" },
+      { id: "DHA", x: 80, y: 280, label: "DHA" },
+      { id: "SAD", x: 200, y: 200, label: "Saddar" },
+      { id: "GLN", x: 350, y: 150, label: "Gulshan-e-Iqbal" },
+      { id: "JHR", x: 450, y: 180, label: "Gulistan-e-Jauhar" },
+      { id: "KRG", x: 550, y: 250, label: "Korangi" },
+      { id: "LYR", x: 500, y: 350, label: "Landhi" },
+      { id: "SFT", x: 400, y: 100, label: "Shah Faisal Town" },
+      { id: "MLP", x: 320, y: 80, label: "Malir" },
+      { id: "NNZ", x: 280, y: 120, label: "North Nazimabad" },
+      { id: "NAZ", x: 250, y: 180, label: "Nazimabad" },
+      { id: "LBR", x: 180, y: 130, label: "Liaquatabad" },
+      { id: "PCH", x: 150, y: 250, label: "PECHS" },
+      { id: "BHD", x: 220, y: 300, label: "Bahadurabad" },
+      { id: "TRQ", x: 280, y: 250, label: "Tariq Road" },
+      { id: "KMR", x: 120, y: 180, label: "Kemari" },
+      { id: "SIT", x: 160, y: 80, label: "SITE" },
+      { id: "OGR", x: 380, y: 200, label: "Orangi" },
+      { id: "BNS", x: 420, y: 280, label: "Bin Qasim" },
+      { id: "APT", x: 480, y: 120, label: "Airport" },
+    ];
+
+    const edges: Edge[] = [
+      { from: "CLF", to: "DHA", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "CLF", to: "PCH", weight: 6, traffic: "high", isBlocked: false },
+      { from: "DHA", to: "PCH", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "PCH", to: "SAD", weight: 7, traffic: "high", isBlocked: false },
+      { from: "PCH", to: "BHD", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "SAD", to: "NAZ", weight: 6, traffic: "high", isBlocked: false },
+      { from: "SAD", to: "LBR", weight: 5, traffic: "high", isBlocked: false },
+      { from: "SAD", to: "KMR", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "NAZ", to: "NNZ", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "NAZ", to: "LBR", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "NNZ", to: "GLN", weight: 10, traffic: "high", isBlocked: false },
+      { from: "GLN", to: "JHR", weight: 8, traffic: "high", isBlocked: false },
+      { from: "GLN", to: "SFT", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "JHR", to: "KRG", weight: 12, traffic: "high", isBlocked: false },
+      { from: "JHR", to: "APT", weight: 7, traffic: "medium", isBlocked: false },
+      { from: "KRG", to: "LYR", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "KRG", to: "BNS", weight: 8, traffic: "low", isBlocked: false },
+      { from: "SFT", to: "MLP", weight: 10, traffic: "medium", isBlocked: false },
+      { from: "SFT", to: "APT", weight: 5, traffic: "low", isBlocked: false },
+      { from: "MLP", to: "NNZ", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "LBR", to: "SIT", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "BHD", to: "TRQ", weight: 3, traffic: "high", isBlocked: false },
+      { from: "TRQ", to: "GLN", weight: 7, traffic: "high", isBlocked: false },
+      { from: "TRQ", to: "OGR", weight: 9, traffic: "medium", isBlocked: false },
+      { from: "OGR", to: "JHR", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "OGR", to: "BNS", weight: 10, traffic: "low", isBlocked: false },
+      { from: "LYR", to: "BNS", weight: 7, traffic: "medium", isBlocked: false },
+      { from: "KMR", to: "SIT", weight: 7, traffic: "low", isBlocked: false },
+    ];
+
+    onLoadTemplate(nodes, edges);
+    toast.success("Karachi city map loaded");
+  };
+
+  // Lahore City Map
+  const generateLahoreMap = () => {
+    const nodes: Node[] = [
+      { id: "GLB", x: 300, y: 200, label: "Gulberg" },
+      { id: "DHA", x: 200, y: 350, label: "DHA" },
+      { id: "MDL", x: 350, y: 150, label: "Model Town" },
+      { id: "JHR", x: 450, y: 200, label: "Johar Town" },
+      { id: "TWN", x: 500, y: 280, label: "Township" },
+      { id: "GAR", x: 380, y: 80, label: "Garden Town" },
+      { id: "IQB", x: 280, y: 100, label: "Iqbal Town" },
+      { id: "WAP", x: 400, y: 350, label: "Wapda Town" },
+      { id: "CAN", x: 150, y: 200, label: "Cantt" },
+      { id: "FRT", x: 220, y: 120, label: "Ferozepur Road" },
+      { id: "SHD", x: 550, y: 150, label: "Shahdara" },
+      { id: "BDP", x: 500, y: 100, label: "Badami Bagh" },
+      { id: "LCO", x: 320, y: 50, label: "Lahore Old City" },
+      { id: "ANR", x: 180, y: 50, label: "Anarkali" },
+      { id: "SHL", x: 100, y: 120, label: "Shalimar" },
+      { id: "RVN", x: 250, y: 280, label: "Ravi Town" },
+      { id: "ALM", x: 350, y: 280, label: "Allama Iqbal Town" },
+      { id: "PKT", x: 130, y: 280, label: "Pak Town" },
+    ];
+
+    const edges: Edge[] = [
+      { from: "GLB", to: "DHA", weight: 10, traffic: "high", isBlocked: false },
+      { from: "GLB", to: "MDL", weight: 6, traffic: "high", isBlocked: false },
+      { from: "GLB", to: "CAN", weight: 8, traffic: "high", isBlocked: false },
+      { from: "GLB", to: "FRT", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "DHA", to: "CAN", weight: 7, traffic: "medium", isBlocked: false },
+      { from: "DHA", to: "PKT", weight: 6, traffic: "low", isBlocked: false },
+      { from: "DHA", to: "RVN", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "MDL", to: "JHR", weight: 7, traffic: "high", isBlocked: false },
+      { from: "MDL", to: "GAR", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "JHR", to: "TWN", weight: 8, traffic: "high", isBlocked: false },
+      { from: "JHR", to: "WAP", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "GAR", to: "IQB", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "GAR", to: "LCO", weight: 7, traffic: "high", isBlocked: false },
+      { from: "IQB", to: "FRT", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "IQB", to: "ANR", weight: 6, traffic: "high", isBlocked: false },
+      { from: "LCO", to: "BDP", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "LCO", to: "ANR", weight: 4, traffic: "high", isBlocked: false },
+      { from: "BDP", to: "SHD", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "SHD", to: "TWN", weight: 10, traffic: "medium", isBlocked: false },
+      { from: "ANR", to: "SHL", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "CAN", to: "SHL", weight: 8, traffic: "low", isBlocked: false },
+      { from: "RVN", to: "ALM", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "ALM", to: "WAP", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "ALM", to: "JHR", weight: 7, traffic: "high", isBlocked: false },
+      { from: "TWN", to: "WAP", weight: 5, traffic: "medium", isBlocked: false },
+    ];
+
+    onLoadTemplate(nodes, edges);
+    toast.success("Lahore city map loaded");
+  };
+
+  // Islamabad City Map
+  const generateIslamabadMap = () => {
+    const nodes: Node[] = [
+      { id: "F6", x: 200, y: 150, label: "F-6 (Super Market)" },
+      { id: "F7", x: 280, y: 150, label: "F-7 (Jinnah Super)" },
+      { id: "F8", x: 360, y: 150, label: "F-8" },
+      { id: "F10", x: 440, y: 150, label: "F-10" },
+      { id: "F11", x: 520, y: 150, label: "F-11" },
+      { id: "G6", x: 200, y: 230, label: "G-6" },
+      { id: "G7", x: 280, y: 230, label: "G-7" },
+      { id: "G8", x: 360, y: 230, label: "G-8" },
+      { id: "G9", x: 440, y: 230, label: "G-9" },
+      { id: "G10", x: 520, y: 230, label: "G-10" },
+      { id: "G11", x: 600, y: 230, label: "G-11" },
+      { id: "I8", x: 360, y: 310, label: "I-8" },
+      { id: "I9", x: 440, y: 310, label: "I-9" },
+      { id: "I10", x: 520, y: 310, label: "I-10" },
+      { id: "BLU", x: 240, y: 80, label: "Blue Area" },
+      { id: "E7", x: 130, y: 150, label: "E-7" },
+      { id: "D12", x: 600, y: 150, label: "D-12" },
+      { id: "H8", x: 360, y: 390, label: "H-8" },
+      { id: "H9", x: 440, y: 390, label: "H-9" },
+      { id: "PWD", x: 600, y: 310, label: "PWD" },
+    ];
+
+    const edges: Edge[] = [
+      { from: "BLU", to: "F6", weight: 4, traffic: "high", isBlocked: false },
+      { from: "BLU", to: "F7", weight: 5, traffic: "high", isBlocked: false },
+      { from: "E7", to: "F6", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "F6", to: "F7", weight: 3, traffic: "high", isBlocked: false },
+      { from: "F6", to: "G6", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "F7", to: "F8", weight: 3, traffic: "high", isBlocked: false },
+      { from: "F7", to: "G7", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "F8", to: "F10", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "F8", to: "G8", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "F10", to: "F11", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "F10", to: "G9", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "F11", to: "D12", weight: 4, traffic: "low", isBlocked: false },
+      { from: "F11", to: "G10", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "G6", to: "G7", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "G7", to: "G8", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "G8", to: "G9", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "G8", to: "I8", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "G9", to: "G10", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "G9", to: "I9", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "G10", to: "G11", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "G10", to: "I10", weight: 4, traffic: "medium", isBlocked: false },
+      { from: "G11", to: "PWD", weight: 6, traffic: "low", isBlocked: false },
+      { from: "I8", to: "I9", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "I8", to: "H8", weight: 4, traffic: "low", isBlocked: false },
+      { from: "I9", to: "I10", weight: 3, traffic: "medium", isBlocked: false },
+      { from: "I9", to: "H9", weight: 4, traffic: "low", isBlocked: false },
+      { from: "I10", to: "PWD", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "H8", to: "H9", weight: 3, traffic: "low", isBlocked: false },
+      { from: "D12", to: "G11", weight: 5, traffic: "low", isBlocked: false },
+    ];
+
+    onLoadTemplate(nodes, edges);
+    toast.success("Islamabad city map loaded");
+  };
+
+  // Peshawar City Map
+  const generatePeshawarMap = () => {
+    const nodes: Node[] = [
+      { id: "HYT", x: 100, y: 200, label: "Hayatabad" },
+      { id: "UNI", x: 200, y: 150, label: "University Town" },
+      { id: "SAD", x: 350, y: 100, label: "Saddar" },
+      { id: "CAN", x: 400, y: 180, label: "Cantonment" },
+      { id: "OLD", x: 450, y: 100, label: "Old City" },
+      { id: "GLG", x: 300, y: 200, label: "Gulbahar" },
+      { id: "BRD", x: 250, y: 280, label: "Board Bazaar" },
+      { id: "NSH", x: 350, y: 300, label: "Nasir Bagh" },
+      { id: "KKP", x: 150, y: 100, label: "Kohat Road" },
+      { id: "RGI", x: 500, y: 200, label: "Ring Road" },
+      { id: "PSU", x: 180, y: 220, label: "Peshawar Uni" },
+      { id: "WRS", x: 400, y: 280, label: "Warsak Road" },
+      { id: "CHK", x: 280, y: 100, label: "Chowk Yadgar" },
+      { id: "QSB", x: 500, y: 120, label: "Qissa Khwani" },
+      { id: "DLZ", x: 150, y: 300, label: "Dalazak Road" },
+    ];
+
+    const edges: Edge[] = [
+      { from: "HYT", to: "UNI", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "HYT", to: "KKP", weight: 10, traffic: "medium", isBlocked: false },
+      { from: "HYT", to: "PSU", weight: 5, traffic: "low", isBlocked: false },
+      { from: "UNI", to: "GLG", weight: 6, traffic: "high", isBlocked: false },
+      { from: "UNI", to: "SAD", weight: 7, traffic: "high", isBlocked: false },
+      { from: "SAD", to: "CHK", weight: 4, traffic: "high", isBlocked: false },
+      { from: "SAD", to: "CAN", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "CHK", to: "OLD", weight: 3, traffic: "high", isBlocked: false },
+      { from: "OLD", to: "QSB", weight: 4, traffic: "high", isBlocked: false },
+      { from: "OLD", to: "CAN", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "CAN", to: "RGI", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "CAN", to: "WRS", weight: 7, traffic: "medium", isBlocked: false },
+      { from: "GLG", to: "BRD", weight: 5, traffic: "high", isBlocked: false },
+      { from: "GLG", to: "NSH", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "BRD", to: "DLZ", weight: 7, traffic: "medium", isBlocked: false },
+      { from: "BRD", to: "NSH", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "NSH", to: "WRS", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "PSU", to: "BRD", weight: 6, traffic: "low", isBlocked: false },
+      { from: "KKP", to: "CHK", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "RGI", to: "QSB", weight: 5, traffic: "low", isBlocked: false },
+      { from: "WRS", to: "RGI", weight: 8, traffic: "low", isBlocked: false },
+      { from: "DLZ", to: "PSU", weight: 6, traffic: "low", isBlocked: false },
+    ];
+
+    onLoadTemplate(nodes, edges);
+    toast.success("Peshawar city map loaded");
+  };
+
+  // Quetta City Map
+  const generateQuettaMap = () => {
+    const nodes: Node[] = [
+      { id: "SAT", x: 300, y: 150, label: "Satellite Town" },
+      { id: "JNH", x: 400, y: 200, label: "Jinnah Town" },
+      { id: "CAN", x: 250, y: 250, label: "Cantonment" },
+      { id: "QDR", x: 350, y: 100, label: "Quaidabad" },
+      { id: "SRM", x: 200, y: 180, label: "Sariab Road" },
+      { id: "JNR", x: 450, y: 120, label: "Jinnah Road" },
+      { id: "ARW", x: 150, y: 100, label: "Arbab Karam Khan" },
+      { id: "BWL", x: 500, y: 200, label: "Brewery Road" },
+      { id: "SMG", x: 350, y: 300, label: "Samungli" },
+      { id: "AIR", x: 500, y: 300, label: "Airport Road" },
+      { id: "HAN", x: 180, y: 300, label: "Hanna Road" },
+      { id: "ZRG", x: 280, y: 50, label: "Zarghoon Road" },
+      { id: "BLC", x: 420, y: 350, label: "Baleli" },
+      { id: "CHM", x: 100, y: 200, label: "Chaman Road" },
+    ];
+
+    const edges: Edge[] = [
+      { from: "SAT", to: "JNH", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "SAT", to: "QDR", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "SAT", to: "CAN", weight: 7, traffic: "high", isBlocked: false },
+      { from: "SAT", to: "SRM", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "JNH", to: "JNR", weight: 4, traffic: "high", isBlocked: false },
+      { from: "JNH", to: "BWL", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "JNH", to: "SMG", weight: 8, traffic: "low", isBlocked: false },
+      { from: "QDR", to: "JNR", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "QDR", to: "ZRG", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "SRM", to: "ARW", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "SRM", to: "CAN", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "CAN", to: "HAN", weight: 7, traffic: "low", isBlocked: false },
+      { from: "CAN", to: "SMG", weight: 6, traffic: "medium", isBlocked: false },
+      { from: "BWL", to: "AIR", weight: 6, traffic: "low", isBlocked: false },
+      { from: "BWL", to: "JNR", weight: 5, traffic: "medium", isBlocked: false },
+      { from: "SMG", to: "AIR", weight: 7, traffic: "low", isBlocked: false },
+      { from: "SMG", to: "BLC", weight: 6, traffic: "low", isBlocked: false },
+      { from: "ARW", to: "ZRG", weight: 8, traffic: "medium", isBlocked: false },
+      { from: "ARW", to: "CHM", weight: 7, traffic: "low", isBlocked: false },
+      { from: "CHM", to: "HAN", weight: 9, traffic: "low", isBlocked: false },
+      { from: "HAN", to: "SMG", weight: 10, traffic: "low", isBlocked: false },
+      { from: "AIR", to: "BLC", weight: 5, traffic: "low", isBlocked: false },
+    ];
+
+    onLoadTemplate(nodes, edges);
+    toast.success("Quetta city map loaded");
+  };
+
+  const graphTemplates = [
     {
       name: "Grid Network",
       description: "4x4 grid representing city streets",
@@ -335,43 +588,136 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
     },
   ];
 
+  const mapTemplates = [
+    {
+      name: "Pakistan",
+      description: "Major cities road network of Pakistan",
+      icon: Map,
+      color: "primary",
+      action: generatePakistanMap,
+    },
+    {
+      name: "Karachi",
+      description: "20 major areas including Clifton, DHA, Gulshan, Korangi",
+      icon: Building2,
+      color: "secondary",
+      action: generateKarachiMap,
+    },
+    {
+      name: "Lahore",
+      description: "18 areas including Gulberg, DHA, Model Town, Johar Town",
+      icon: Landmark,
+      color: "accent",
+      action: generateLahoreMap,
+    },
+    {
+      name: "Islamabad",
+      description: "20 sectors including F-6, F-7, G-9, Blue Area",
+      icon: MapPin,
+      color: "primary",
+      action: generateIslamabadMap,
+    },
+    {
+      name: "Peshawar",
+      description: "15 areas including Hayatabad, University Town, Saddar",
+      icon: Building2,
+      color: "secondary",
+      action: generatePeshawarMap,
+    },
+    {
+      name: "Quetta",
+      description: "14 areas including Satellite Town, Jinnah Town, Cantonment",
+      icon: Landmark,
+      color: "accent",
+      action: generateQuettaMap,
+    },
+  ];
+
   return (
     <Card className="border-2">
       <CardHeader>
         <CardTitle className="font-display">Graph Templates Library</CardTitle>
         <CardDescription>
-          Quick-load common network topologies and graph structures
+          Quick-load common network topologies and Pakistani city maps
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template, index) => (
-            <Card 
-              key={index}
-              className={`border-2 hover:shadow-lg transition-all duration-300 cursor-pointer group`}
-              onClick={template.action}
-            >
-              <CardContent className="pt-6 space-y-4">
-                <div className={`w-12 h-12 rounded-lg bg-${template.color}/10 flex items-center justify-center group-hover:bg-${template.color}/20 transition-colors`}>
-                  <template.icon className={`w-6 h-6 text-${template.color}`} />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">{template.name}</h3>
-                  <p className="text-sm text-muted-foreground">{template.description}</p>
-                </div>
-                <Button 
-                  className={`w-full bg-${template.color} hover:bg-${template.color}/90`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    template.action();
-                  }}
+        <Tabs defaultValue="maps" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="maps" className="flex items-center gap-2">
+              <Map className="w-4 h-4" />
+              Maps
+            </TabsTrigger>
+            <TabsTrigger value="graphs" className="flex items-center gap-2">
+              <Grid3x3 className="w-4 h-4" />
+              Graph Templates
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="maps" className="mt-0">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mapTemplates.map((template, index) => (
+                <Card 
+                  key={index}
+                  className={`border-2 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:border-primary/50`}
+                  onClick={template.action}
                 >
-                  Load Template
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className={`w-12 h-12 rounded-lg bg-${template.color}/10 flex items-center justify-center group-hover:bg-${template.color}/20 transition-colors`}>
+                      <template.icon className={`w-6 h-6 text-${template.color}`} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">{template.name}</h3>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
+                    </div>
+                    <Button 
+                      className="w-full"
+                      variant="default"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        template.action();
+                      }}
+                    >
+                      Load Map
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="graphs" className="mt-0">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {graphTemplates.map((template, index) => (
+                <Card 
+                  key={index}
+                  className={`border-2 hover:shadow-lg transition-all duration-300 cursor-pointer group`}
+                  onClick={template.action}
+                >
+                  <CardContent className="pt-6 space-y-4">
+                    <div className={`w-12 h-12 rounded-lg bg-${template.color}/10 flex items-center justify-center group-hover:bg-${template.color}/20 transition-colors`}>
+                      <template.icon className={`w-6 h-6 text-${template.color}`} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">{template.name}</h3>
+                      <p className="text-sm text-muted-foreground">{template.description}</p>
+                    </div>
+                    <Button 
+                      className="w-full"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        template.action();
+                      }}
+                    >
+                      Load Template
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
