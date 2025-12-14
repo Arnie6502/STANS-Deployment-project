@@ -59,6 +59,12 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
   const [history, setHistory] = useState<GraphSnapshot[]>([]);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(-1);
 
+  // Edge editing state
+  const [selectedEdgeKey, setSelectedEdgeKey] = useState<string | null>(null);
+  const [editingEdgeWeight, setEditingEdgeWeight] = useState("");
+  const [editingEdgeTraffic, setEditingEdgeTraffic] = useState<"low" | "medium" | "high">("low");
+  const [editingEdgeBlocked, setEditingEdgeBlocked] = useState(false);
+
   // Save to history
   const saveToHistory = (description: string, newNodes: Node[], newEdges: Edge[]) => {
     const snapshot: GraphSnapshot = {
@@ -313,7 +319,44 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
     const updatedEdges = edges.filter((e) => !(e.from === from && e.to === to));
     setEdges(updatedEdges);
     saveToHistory(`Deleted edge ${from}-${to}`, nodes, updatedEdges);
+    setSelectedEdgeKey(null);
     toast.success(`Edge ${from}-${to} deleted`);
+  };
+
+  // Edge selection handler
+  const handleEdgeClick = (edge: Edge, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const key = `${edge.from}-${edge.to}`;
+    setSelectedEdgeKey(key);
+    setEditingEdgeWeight(String(edge.weight));
+    setEditingEdgeTraffic(edge.traffic);
+    setEditingEdgeBlocked(edge.isBlocked || false);
+  };
+
+  // Save edge edits
+  const saveEdgeEdit = () => {
+    if (!selectedEdgeKey) return;
+    const [from, to] = selectedEdgeKey.split("-");
+    
+    const updatedEdges = edges.map((e) =>
+      e.from === from && e.to === to
+        ? {
+            ...e,
+            weight: parseInt(editingEdgeWeight) || e.weight,
+            traffic: editingEdgeTraffic,
+            isBlocked: editingEdgeBlocked,
+          }
+        : e
+    );
+    
+    setEdges(updatedEdges);
+    saveToHistory(`Updated edge ${from}-${to}`, nodes, updatedEdges);
+    toast.success(`Edge ${from}-${to} updated`);
+    setSelectedEdgeKey(null);
+  };
+
+  const cancelEdgeEdit = () => {
+    setSelectedEdgeKey(null);
   };
 
   const clearGraph = () => {
@@ -520,17 +563,31 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                 const from = getNodePosition(edge.from);
                 const to = getNodePosition(edge.to);
                 if (!from || !to) return null;
+                const edgeKey = `${edge.from}-${edge.to}`;
+                const isSelected = selectedEdgeKey === edgeKey;
 
                 return (
                   <g key={index}>
+                    {/* Clickable area for edge selection */}
+                    <line
+                      x1={from.x}
+                      y1={from.y}
+                      x2={to.x}
+                      y2={to.y}
+                      stroke="transparent"
+                      strokeWidth={20}
+                      strokeLinecap="round"
+                      className="cursor-pointer"
+                      onClick={(e) => handleEdgeClick(edge, e)}
+                    />
                     {/* Edge background for better visibility */}
                     <line
                       x1={from.x}
                       y1={from.y}
                       x2={to.x}
                       y2={to.y}
-                      stroke="hsl(var(--foreground) / 0.2)"
-                      strokeWidth={edge.isBlocked ? 8 : 6}
+                      stroke={isSelected ? "hsl(var(--primary) / 0.5)" : "hsl(var(--foreground) / 0.2)"}
+                      strokeWidth={isSelected ? 10 : edge.isBlocked ? 8 : 6}
                       strokeLinecap="round"
                     />
                     {/* Main edge line */}
@@ -543,7 +600,7 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                       strokeWidth={edge.isBlocked ? 5 : 4}
                       strokeDasharray={edge.isBlocked ? "8,4" : "none"}
                       strokeLinecap="round"
-                      className="transition-all"
+                      className="transition-all pointer-events-none"
                     />
                     <text
                       x={(from.x + to.x) / 2}
@@ -551,13 +608,34 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                       fill="hsl(var(--foreground))"
                       fontSize="12"
                       fontWeight="600"
-                      className="select-none"
+                      className="select-none pointer-events-none"
                     >
                       {edge.weight}km
                     </text>
+                    {/* Edit edge button */}
+                    <circle
+                      cx={(from.x + to.x) / 2 - 15}
+                      cy={(from.y + to.y) / 2 + 10}
+                      r="8"
+                      fill="hsl(var(--secondary))"
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={(e) => handleEdgeClick(edge, e)}
+                    />
+                    <text
+                      x={(from.x + to.x) / 2 - 15}
+                      y={(from.y + to.y) / 2 + 10}
+                      fill="white"
+                      fontSize="10"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="pointer-events-none select-none"
+                    >
+                      ✎
+                    </text>
                     {/* Delete edge button */}
                     <circle
-                      cx={(from.x + to.x) / 2}
+                      cx={(from.x + to.x) / 2 + 15}
                       cy={(from.y + to.y) / 2 + 10}
                       r="8"
                       fill="hsl(var(--destructive))"
@@ -568,7 +646,7 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                       }}
                     />
                     <text
-                      x={(from.x + to.x) / 2}
+                      x={(from.x + to.x) / 2 + 15}
                       y={(from.y + to.y) / 2 + 10}
                       fill="white"
                       fontSize="10"
@@ -725,6 +803,63 @@ const GraphBuilder = ({ nodes, edges, setNodes, setEdges }: GraphBuilderProps) =
                 <Button size="sm" onClick={cancelNodeEdit} variant="outline">
                   <X className="w-4 h-4" />
                 </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Edge Editing Panel */}
+          {selectedEdgeKey && (
+            <Card className="p-4 bg-muted/50 border-secondary/30">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Edit2 className="w-4 h-4 text-secondary" />
+                  <Label className="font-semibold">Edit Road Segment: {selectedEdgeKey.replace('-', ' → ')}</Label>
+                </div>
+                <div className="grid sm:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="editWeight">Distance (km)</Label>
+                    <Input
+                      id="editWeight"
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={editingEdgeWeight}
+                      onChange={(e) => setEditingEdgeWeight(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editTraffic">Traffic Level</Label>
+                    <Select value={editingEdgeTraffic} onValueChange={(v: any) => setEditingEdgeTraffic(v)}>
+                      <SelectTrigger id="editTraffic">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">🟢 Low Traffic</SelectItem>
+                        <SelectItem value="medium">🟡 Medium Traffic</SelectItem>
+                        <SelectItem value="high">🔴 High Traffic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Road Status</Label>
+                    <Button
+                      onClick={() => setEditingEdgeBlocked(!editingEdgeBlocked)}
+                      variant={editingEdgeBlocked ? "destructive" : "outline"}
+                      className="w-full"
+                    >
+                      {editingEdgeBlocked ? "🚧 Blocked" : "✓ Open"}
+                    </Button>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <Button onClick={saveEdgeEdit} variant="default" className="flex-1">
+                      <Check className="w-4 h-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button onClick={cancelEdgeEdit} variant="outline">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </Card>
           )}

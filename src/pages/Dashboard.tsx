@@ -19,7 +19,10 @@ import {
   Grid3x3,
   BookOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Upload,
+  GraduationCap,
+  Sparkles
 } from "lucide-react";
 import type { Edge } from "@/utils/kruskal";
 import GraphBuilder from "@/components/GraphBuilder";
@@ -27,6 +30,9 @@ import GraphTemplates from "@/components/GraphTemplates";
 import GraphVisualization from "@/components/GraphVisualization";
 import DijkstraVisualization from "@/components/DijkstraVisualization";
 import PrimVisualization from "@/components/PrimVisualization";
+import GraphImport from "@/components/GraphImport";
+import EducationalMode from "@/components/EducationalMode";
+import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 
 interface Node {
   id: string;
@@ -53,6 +59,9 @@ const Dashboard = () => {
   // Sidebar state
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  
+  // Tutorial state
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
   const handleEdgesUpdate = useCallback((updatedEdges: Edge[]) => {
     setEdges(updatedEdges);
@@ -170,6 +179,33 @@ const Dashboard = () => {
                     <Grid3x3 className="w-4 h-4 mr-2" />
                     Load Template
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("import")}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Import/Export
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("learn")}
+                  >
+                    <GraduationCap className="w-4 h-4 mr-2" />
+                    Learn Mode
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => setIsTutorialOpen(true)}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Start Tutorial
+                  </Button>
                   <Link to="/concepts" className="block">
                     <Button 
                       variant="outline" 
@@ -224,6 +260,14 @@ const Dashboard = () => {
                   <Grid3x3 className="w-3.5 h-3.5" />
                   Templates
                 </TabsTrigger>
+                <TabsTrigger value="import" className="text-xs gap-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  Import
+                </TabsTrigger>
+                <TabsTrigger value="learn" className="text-xs gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  Learn
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -273,6 +317,36 @@ const Dashboard = () => {
                   }} 
                 />
               </TabsContent>
+
+              <TabsContent value="import" className="m-0">
+                <GraphImport 
+                  onImportGraph={(data) => {
+                    setNodes(data.nodes);
+                    setEdges(data.edges.map(e => ({
+                      from: e.from,
+                      to: e.to,
+                      weight: e.weight,
+                      traffic: e.traffic > 0.6 ? 'high' : e.traffic > 0.3 ? 'medium' : 'low',
+                      isBlocked: e.blocked
+                    })));
+                    setActiveTab("map");
+                  }}
+                  currentGraph={{
+                    nodes,
+                    edges: edges.map(e => ({
+                      from: e.from,
+                      to: e.to,
+                      weight: e.weight,
+                      traffic: e.traffic === 'low' ? 0.3 : e.traffic === 'medium' ? 0.6 : 0.9,
+                      blocked: e.isBlocked || false
+                    }))
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="learn" className="m-0">
+                <EducationalMode />
+              </TabsContent>
             </div>
           </Tabs>
         </main>
@@ -302,6 +376,16 @@ const Dashboard = () => {
           </ScrollArea>
         </aside>
       </div>
+      
+      {/* Interactive Tutorial */}
+      <InteractiveTutorial 
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+        nodes={nodes}
+        edges={edges}
+        currentTab={activeTab}
+        onTabChange={setActiveTab}
+      />
     </div>
   );
 };
