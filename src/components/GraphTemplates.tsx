@@ -4,6 +4,7 @@ import { Grid3x3, GitBranch, Circle, GitMerge, Layout, MapPin, Map, Building2, L
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Edge } from "@/utils/kruskal";
+import type { MapType } from "@/components/maps/PakistanMapSVG";
 
 interface Node {
   id: string;
@@ -13,7 +14,7 @@ interface Node {
 }
 
 interface GraphTemplatesProps {
-  onLoadTemplate: (nodes: Node[], edges: Edge[]) => void;
+  onLoadTemplate: (nodes: Node[], edges: Edge[], mapType?: MapType) => void;
 }
 
 const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
@@ -273,7 +274,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "SGD", to: "LHR", weight: 190, traffic: "medium", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'pakistan');
     toast.success("Pakistan road network loaded");
   };
 
@@ -333,7 +334,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "KMR", to: "SIT", weight: 7, traffic: "low", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'karachi');
     toast.success("Karachi city map loaded");
   };
 
@@ -388,7 +389,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "TWN", to: "WAP", weight: 5, traffic: "medium", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'lahore');
     toast.success("Lahore city map loaded");
   };
 
@@ -449,7 +450,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "D12", to: "G11", weight: 5, traffic: "low", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'islamabad');
     toast.success("Islamabad city map loaded");
   };
 
@@ -498,7 +499,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "DLZ", to: "PSU", weight: 6, traffic: "low", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'peshawar');
     toast.success("Peshawar city map loaded");
   };
 
@@ -546,7 +547,7 @@ const GraphTemplates = ({ onLoadTemplate }: GraphTemplatesProps) => {
       { from: "AIR", to: "BLC", weight: 5, traffic: "low", isBlocked: false },
     ];
 
-    onLoadTemplate(nodes, edges);
+    onLoadTemplate(nodes, edges, 'quetta');
     toast.success("Quetta city map loaded");
   };
 

@@ -33,6 +33,7 @@ import PrimVisualization from "@/components/PrimVisualization";
 import GraphImport from "@/components/GraphImport";
 import EducationalMode from "@/components/EducationalMode";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
+import type { MapType } from "@/components/maps/PakistanMapSVG";
 
 interface Node {
   id: string;
@@ -49,6 +50,7 @@ const Dashboard = () => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [highlightedPath, setHighlightedPath] = useState<string[]>([]);
   const [mstEdges, setMstEdges] = useState<Edge[]>([]);
+  const [currentMapType, setCurrentMapType] = useState<MapType>(null);
   const [algorithmStatus, setAlgorithmStatus] = useState<{
     name: string;
     step: string;
@@ -277,7 +279,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex-1 overflow-auto p-2 md:p-4">
-              <TabsContent value="map" className="m-0 h-full">
+              <TabsContent value="map" className="m-0 h-full min-h-[300px] md:min-h-[400px]">
                 <TrafficMapCanvas
                   nodes={nodes}
                   edges={edges}
@@ -289,6 +291,7 @@ const Dashboard = () => {
                   onNodeSelect={setSelectedNode}
                   currentNode={selectedNode}
                   visitedNodes={new Set()}
+                  mapType={currentMapType}
                 />
               </TabsContent>
 
@@ -315,9 +318,10 @@ const Dashboard = () => {
 
               <TabsContent value="templates" className="m-0">
                 <GraphTemplates 
-                  onLoadTemplate={(templateNodes, templateEdges) => {
+                  onLoadTemplate={(templateNodes, templateEdges, mapType) => {
                     setNodes(templateNodes);
                     setEdges(templateEdges);
+                    setCurrentMapType(mapType || null);
                     setActiveTab("map");
                   }} 
                 />

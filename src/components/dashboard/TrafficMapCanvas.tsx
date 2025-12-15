@@ -3,6 +3,16 @@ import { motion } from "framer-motion";
 import { useCanvasZoom } from "@/hooks/useCanvasZoom";
 import CanvasZoomControls from "@/components/CanvasZoomControls";
 import type { Edge } from "@/utils/kruskal";
+import {
+  PakistanOutline,
+  KarachiOutline,
+  LahoreOutline,
+  IslamabadOutline,
+  PeshawarOutline,
+  QuettaOutline,
+  PakistanCityMarkers,
+  type MapType
+} from "@/components/maps/PakistanMapSVG";
 
 interface Node {
   id: string;
@@ -22,6 +32,7 @@ interface TrafficMapCanvasProps {
   mstEdges?: Edge[];
   visitedNodes?: Set<string>;
   currentNode?: string;
+  mapType?: MapType;
 }
 
 const TrafficMapCanvas = ({
@@ -35,6 +46,7 @@ const TrafficMapCanvas = ({
   mstEdges = [],
   visitedNodes = new Set(),
   currentNode,
+  mapType = null,
 }: TrafficMapCanvasProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   
@@ -48,6 +60,31 @@ const TrafficMapCanvas = ({
     handleMouseUp,
     resetView,
   } = useCanvasZoom({ baseWidth: 900, baseHeight: 500 });
+
+  // Render appropriate map outline based on mapType
+  const renderMapOutline = () => {
+    switch (mapType) {
+      case 'pakistan':
+        return (
+          <>
+            <PakistanOutline />
+            <PakistanCityMarkers />
+          </>
+        );
+      case 'karachi':
+        return <KarachiOutline />;
+      case 'lahore':
+        return <LahoreOutline />;
+      case 'islamabad':
+        return <IslamabadOutline />;
+      case 'peshawar':
+        return <PeshawarOutline />;
+      case 'quetta':
+        return <QuettaOutline />;
+      default:
+        return null;
+    }
+  };
 
   const getEdgeId = (edge: Edge) => `${edge.from}-${edge.to}`;
 
@@ -181,6 +218,9 @@ const TrafficMapCanvas = ({
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
+
+        {/* Map Outline */}
+        {renderMapOutline()}
 
         {/* Edges (Roads) */}
         {edges.map(edge => {
