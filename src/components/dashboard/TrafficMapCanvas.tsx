@@ -144,35 +144,81 @@ const TrafficMapCanvas = ({
     return 10;
   };
 
-  // Traffic flow animation particles
+  // Traffic flow animation particles - shows moving dots that slow down with congestion
   const renderTrafficFlow = (edge: Edge, x1: number, y1: number, x2: number, y2: number) => {
     if (edge.isBlocked) return null;
     
     const multiplier = trafficMultipliers[getEdgeId(edge)] || 1;
-    const speed = multiplier > 2 ? 6 : multiplier > 1.5 ? 4 : 2;
+    const baseTraffic = edge.traffic === 'high' ? 2.5 : edge.traffic === 'medium' ? 1.5 : 1;
+    const effectiveTraffic = baseTraffic * multiplier;
+    
+    // Higher traffic = slower speed (longer duration)
+    const baseDuration = 1.5;
+    const duration = baseDuration + (effectiveTraffic * 0.8);
+    
+    // More particles for heavy traffic
+    const particleCount = effectiveTraffic > 2 ? 5 : effectiveTraffic > 1.5 ? 4 : 3;
+    
+    // Color based on traffic level
+    const particleColor = effectiveTraffic > 2.5 
+      ? "hsl(var(--traffic-heavy))" 
+      : effectiveTraffic > 1.5 
+        ? "hsl(var(--traffic-moderate))" 
+        : "hsl(var(--traffic-clear))";
+    
+    // Size based on congestion (larger = more congested)
+    const particleSize = effectiveTraffic > 2 ? 4 : effectiveTraffic > 1.5 ? 3 : 2.5;
     
     return (
       <g key={`flow-${getEdgeId(edge)}`}>
-        {[0, 1, 2].map(i => (
+        {Array.from({ length: particleCount }).map((_, i) => (
           <motion.circle
             key={i}
-            r={2}
-            fill="hsl(var(--foreground))"
-            opacity={0.6}
+            r={particleSize}
+            fill={particleColor}
             initial={{ 
               cx: x1, 
               cy: y1,
-              opacity: 0
+              opacity: 0,
+              scale: 0.5
             }}
             animate={{
               cx: [x1, x2],
               cy: [y1, y2],
-              opacity: [0, 0.6, 0.6, 0],
+              opacity: [0, 0.9, 0.9, 0],
+              scale: [0.5, 1, 1, 0.5],
             }}
             transition={{
-              duration: speed,
+              duration: duration,
               repeat: Infinity,
-              delay: i * (speed / 3),
+              delay: i * (duration / particleCount),
+              ease: "linear",
+            }}
+          />
+        ))}
+        {/* Reverse direction flow for bi-directional traffic */}
+        {Array.from({ length: Math.max(2, particleCount - 1) }).map((_, i) => (
+          <motion.circle
+            key={`rev-${i}`}
+            r={particleSize * 0.8}
+            fill={particleColor}
+            opacity={0.7}
+            initial={{ 
+              cx: x2, 
+              cy: y2,
+              opacity: 0,
+              scale: 0.5
+            }}
+            animate={{
+              cx: [x2, x1],
+              cy: [y2, y1],
+              opacity: [0, 0.7, 0.7, 0],
+              scale: [0.5, 0.9, 0.9, 0.5],
+            }}
+            transition={{
+              duration: duration * 1.1,
+              repeat: Infinity,
+              delay: i * (duration / (particleCount - 1)) + 0.3,
               ease: "linear",
             }}
           />
