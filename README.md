@@ -1,59 +1,129 @@
-# Smart Traffic-Aware Navigation System (STANS)
+# STANS Navigation System
 
-A map guidance system that helps individuals and businesses navigate efficiently by calculating optimal routes based on traffic conditions, blockades, and distance.
+A modern, interactive traffic-aware navigation system built with React, TypeScript, and advanced graph algorithms.
 
-## Project Overview
+## 🚀 Quick Start
 
-This system develops a map guidance platform utilizing **Kruskal's algorithm** to compute the minimum spanning tree of a weighted directed graph. Graph weights are determined by distance, traffic intensity, and blockades, providing users with optimal routes they wouldn't know about ahead of time.
+### Local Development
 
-## Features
+bash
 
-- **Graph Visualization**: Interactive 2D and 3D graph visualization with traffic-aware coloring
-- **Algorithm Comparison**: Side-by-side comparison of Kruskal's, Prim's, and Dijkstra's algorithms
-- **Route Calculator**: Calculate optimal paths between nodes
-- **Graph Builder**: Create custom graphs with nodes, edges, and traffic conditions
-- **Graph Templates**: Quick-load common network topologies (Grid, Tree, Complete, Bipartite, Star)
-- **Performance Benchmarking**: Measure and compare algorithm execution times
-- **Graph Metrics**: Analyze degree distribution, clustering coefficient, and betweenness centrality
-- **Interactive Tutorial**: Step-by-step guide to using the system
-- **Import/Export**: Support for JSON and CSV file formats
+## Install dependencies
 
-## Technologies Used
-
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- Three.js (3D Visualization)
-- Framer Motion (Animations)
-- Recharts (Data Visualization)
-
--![Alt](https://repobeats.axiom.co/api/embed/a30bbe6fff62957b3cce362eef11556425224647.svg "Repobeats analytics image")
-
-## Demo
-
-<https://github.com/user-attachments/assets/316df9d7-7e5a-47f3-9cdd-c0bae09110ae>
-
-## Course Information
-
-- **Course**: Data Structures and Algorithms
-- **Class**: BSE-3(B)
-- **University**: Bahria University, Karachi Campus
-- **Course Instructor**: Engr. Majid Kalim
-- **Lab Instructor**: Engr. Saniya Sarim
-
-## Getting Started
-
-```bash
-# Install dependencies
 npm install
 
-# Start development server
+## Start development server
+
 npm run dev
 
-# Build for production
+## Build for production
+
 npm run build
-```
 
-## License
+## Docker Deployment
 
-This project is developed as part of the Data Structures and Algorithms course at Bahria University.
+bash
+
+## Build Docker image
+
+docker build -t stans-app .
+
+## Run container
+
+docker run -d -p 8080:80 --name stans-app stans-app
+
+## Or use Docker Compose
+
+docker-compose up -d
+
+## 📦 Deployment
+
+This project includes comprehensive deployment configurations:
+
+- **Docker**: Multi-stage builds with Nginx
+- **CI/CD**: GitHub Actions workflow
+- **Kubernetes**: Production-ready manifests
+- **Terraform**: Infrastructure as Code
+- **Monitoring**: Prometheus, Grafana, Alertmanager
+
+### Deployment Documentation
+
+- [Quick Deployment Guide](DEPLOYMENT_README.md) - Get started quickly
+- [Complete Deployment Guide](DEPLOYMENT.md) - Detailed instructions
+- [Project Summary](PROJECT_SUMMARY.md) - Overview of all components
+
+### Deployment Options
+
+1. **Docker** - Simple containerized deployment
+2. **Docker Compose** - Local development and production
+3. **Kubernetes** - Scalable orchestration
+4. **Terraform** - Automated infrastructure provisioning
+5. **CI/CD** - Automated deployment with GitHub Actions
+
+## 📊 Monitoring
+
+The project includes a complete monitoring stack:
+
+- **Prometheus** - Metrics collection
+- **Grafana** - Visualization dashboards
+- **Alertmanager** - Alert routing and notifications
+- **Node Exporter** - System metrics
+- **cAdvisor** - Container metrics
+
+See [monitoring/README.md](monitoring/README.md) for setup instructions.
+
+## 🔧 Scripts
+
+Convenient scripts for development and deployment:
+
+bash
+
+## Development helper
+
+./scripts/dev.sh dev          # Start dev server
+./scripts/dev.sh build        # Build for production
+./scripts/dev.sh docker:build # Build Docker image
+./scripts/dev.sh docker:run   # Run Docker container
+
+## Production deployment
+
+./scripts/deploy.sh YOUR_USERNAME/STANS
+
+## 📁 Project Structure
+
+STANS/
+├── src/                    # Application source code
+├── .github/workflows/      # CI/CD pipelines
+├── scripts/                # Deployment scripts
+├── k8s/                    # Kubernetes manifests
+├── terraform/              # Infrastructure as Code
+├── monitoring/             # Monitoring stack
+├── Dockerfile              # Container build
+├── docker-compose.yml      # Local development
+└── DEPLOYMENT.md           # Deployment documentation
+
+## 🎯 Features
+
+- Interactive graph visualization
+- Multiple routing algorithms (Dijkstra, Prim, Kruskal)
+- Real-time traffic simulation
+- 3D graph visualization
+- Educational mode with tutorials
+- Performance benchmarking
+- Mobile-responsive design
+- Dark/Light theme support
+
+## 📚 Documentation
+
+- [Deployment Guide](DEPLOYMENT.md) - Complete deployment instructions
+- [Kubernetes Deployment](k8s/README.md) - K8s setup and management
+- [Terraform Setup](terraform/README.md) - Infrastructure automation
+- [Monitoring Setup](monitoring/README.md) - Monitoring and alerting
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
+## 📄 License
+
+This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
