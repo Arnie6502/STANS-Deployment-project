@@ -368,32 +368,21 @@ Deployment Options
 
 1. Docker (Simple)
 
-[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
-
 docker build -t stans-app .
-
 docker run -d -p 80:80 --name stans-app stans-app
 
 1. Docker Compose (Recommended)
-
-[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
 
 docker-compose up -d
 
 1. Kubernetes (Scalable)
 
-[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
-
 kubectl apply -f k8s/
 
 1. Terraform (Infrastructure as Code)
 
-[data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
-
 cd terraform
-
 terraform init
-
 terraform apply
 
 1. CI/CD (Automated)
