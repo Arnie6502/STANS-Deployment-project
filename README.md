@@ -120,10 +120,4 @@ STANS/
 - [Terraform Setup](terraform/README.md) - Infrastructure automation
 - [Monitoring Setup](monitoring/README.md) - Monitoring and alerting
 
-## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
-
-## 📄 License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
