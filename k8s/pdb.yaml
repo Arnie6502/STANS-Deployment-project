@@ -1,0 +1,12 @@
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: stans-app-pdb
+  labels:
+    app: stans-app
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: stans-app

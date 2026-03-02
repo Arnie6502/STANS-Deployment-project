@@ -1,0 +1,12 @@
+groups:
+  - name: stans_alerts
+    interval: 30s
+    rules:
+      - alert: STANSApplicationDown
+        expr: up{job="stans-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "STANS application is down"
+          description: "STANS application has been down for more than 1 minute."

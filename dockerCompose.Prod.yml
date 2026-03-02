@@ -1,0 +1,35 @@
+
+version: '3.8'
+
+services:
+  stans-app:
+    image: ghcr.io/YOUR_USERNAME/STANS:latest
+    container_name: stans-app
+    ports:
+      - "80:80"
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - stans-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  stans-network:
+    driver: bridge

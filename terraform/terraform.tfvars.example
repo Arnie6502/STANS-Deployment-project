@@ -1,0 +1,51 @@
+Example Terraform Variables File
+
+Copy this file to terraform.tfvars and fill in your actual values
+
+DigitalOcean API token (required)
+
+Get this from: https://cloud.digitalocean.com/account/api/tokens
+
+do_token = "your_digitalocean_api_token_here"
+
+
+SSH key fingerprint (optional - will be created if not provided)
+
+Get this from: https://cloud.digitalocean.com/account/keys
+
+ssh_key_fingerprint = ""
+
+
+Domain name for the application
+
+domain_name = "stans-app.com"
+
+
+Project name for resource tagging
+
+project_name = "stans-navigation"
+
+
+Server region (nyc1, nyc2, nyc3, ams1, ams2, ams3, sfo1, sfo2, sfo3, lon1, fra1, tor1, sgp1, blr1)
+
+server_region = "nyc3"
+
+
+Server size (s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb, s-2vcpu-4gb, etc.)
+
+server_size = "s-2vcpu-4gb"
+
+
+Enable monitoring
+
+enable_monitoring = true
+
+
+Enable backups
+
+enable_backups = true
+
+
+Environment (production, staging, development)
+
+environment = "production"
