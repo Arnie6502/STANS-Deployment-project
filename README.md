@@ -1,6 +1,12 @@
-# STANS Navigation System
+# STANS Navigation System Deployment project
 
-A modern, interactive traffic-aware navigation system built with React, TypeScript, and advanced graph algorithms.
+Overview
+
+This project provides a complete DevOps solution for deploying the STANS (Smart Traffic-Aware Navigation System) with industry-standard practices including containerization, CI/CD pipelines, production deployment, monitoring, and infrastructure automation.
+
+https://roadmap.sh/projects/stans-navigation-deployment
+
+
 
 ## 🚀 Quick Start
 
